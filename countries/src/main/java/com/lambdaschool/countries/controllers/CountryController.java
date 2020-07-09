@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @RestController
@@ -35,8 +36,8 @@ public class CountryController {
     @GetMapping(value = "/names/all",
                 produces = {"application/json"})
     public ResponseEntity<?> listAllCountryNames() {
+        countryList.clear();
         countryrepo.findAll().iterator().forEachRemaining(countryList::add);
-
         countryList.sort((c1, c2) -> c1.getCname().compareToIgnoreCase(c2.getCname()));
         return new ResponseEntity<>(countryList, HttpStatus.OK);
     }
@@ -45,6 +46,7 @@ public class CountryController {
                 produces = {"application/json"})
 
     public ResponseEntity<?> listAllByFirstName(@PathVariable char letter) {
+        countryList.clear();
         countryrepo.findAll().iterator().forEachRemaining(countryList::add);
         List<Country> rtnList = findCountries(countryList, e-> e.getCname().charAt(0) == letter);
 
@@ -56,18 +58,88 @@ public class CountryController {
         return new ResponseEntity<>(rtnList, HttpStatus.OK);
     }
 
-    @GetMapping(value = "/names/size/{people}",
-            produces = {"application/json"})
-    public ResponseEntity<?> listByGreaterThanOrEqualTo(@PathVariable char people) {
+    @GetMapping(value = "/names/size/{num}",
+                produces = {"application/json"})
+    public ResponseEntity<?> listByNameLength(@PathVariable int num) {
+        countryList.clear();
         countryrepo.findAll().iterator().forEachRemaining(countryList::add);
-        List<Country> rtnList = findCountries(countryList, e-> e.getPopulation() > );
+        List<Country> rtnList = findCountries(countryList, e-> e.getCname().length() >= num);
 
-        for (Country c : rtnList)
-        {
+        for (Country c : rtnList) {
             System.out.println(c);
         }
 
         return new ResponseEntity<>(rtnList, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/names/population/{people}",
+                produces = {"application/json"})
+    public ResponseEntity<?> listByGreaterThanOrEqualTo(@PathVariable int people) {
+        countryList.clear();
+        countryrepo.findAll().iterator().forEachRemaining(countryList::add);
+        List<Country> rtnList = findCountries(countryList, e-> e.getPopulation() >= people);
+
+        for (Country c : rtnList) {
+            System.out.println(c);
+        }
+
+        return new ResponseEntity<>(rtnList, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/names/min/population",
+                produces = {"application/json"})
+    public ResponseEntity<?> minPop() {
+        countryList.clear();
+        countryrepo.findAll().iterator().forEachRemaining(countryList::add);
+        countryList.sort(Comparator.comparingInt(Country::getPopulation));
+
+        for (Country c : countryList) {
+            System.out.println(c);
+        }
+
+        return new ResponseEntity<>(countryList.get(0), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/names/max/population",
+                produces = {"application/json"})
+    public ResponseEntity<?> maxPop() {
+        countryList.clear();
+        countryrepo.findAll().iterator().forEachRemaining(countryList::add);
+        countryList.sort((c1, c2) -> c2.getPopulation() - c1.getPopulation());
+
+        for (Country c : countryList) {
+            System.out.println(c);
+        }
+
+        return new ResponseEntity<>(countryList.get(0), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/age/age/{age}",
+                produces = {"application/json"})
+    public ResponseEntity<?> findAgesFrom(@PathVariable int age) {
+        countryList.clear();
+        countryrepo.findAll().iterator().forEachRemaining(countryList::add);
+        List<Country> rtnList = findCountries(countryList, c -> c.getMedian_age() >= age);
+
+
+        for (Country c : countryList) {
+            System.out.println(c);
+        }
+
+        return new ResponseEntity<>(rtnList, HttpStatus.OK);
+    }
+    @GetMapping(value = "/age/min",
+                produces = {"application/json"})
+    public ResponseEntity<?> minAge() {
+        countryList.clear();
+        countryrepo.findAll().iterator().forEachRemaining(countryList::add);
+        countryList.sort(Comparator.comparingInt(Country::getMedian_age));
+
+        for (Country c : countryList) {
+            System.out.println(c);
+        }
+
+        return new ResponseEntity<>(countryList.get(0), HttpStatus.OK);
     }
 
 }
