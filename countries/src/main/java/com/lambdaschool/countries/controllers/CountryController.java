@@ -5,12 +5,14 @@ import com.lambdaschool.countries.repositories.CountryRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 @RestController
@@ -393,5 +395,34 @@ public class CountryController {
 
         return new ResponseEntity<>(countryList.get((countryList.size() / 2) - 1), HttpStatus.OK);
     }
+
+    @DeleteMapping(path = "/delete/{id}")
+    public ResponseEntity<?> deleteCountry(@PathVariable int id) {
+        countryList.clear();
+        this.addCountries();
+        countryrepo.findAll().iterator().forEachRemaining(countryList::add);
+
+        System.out.println("\n" + countryList);
+
+        Iterator<Country> i = countryList.iterator();
+        while (i.hasNext()) {
+            Country country = i.next();
+            if (country.getId() == id) {
+                i.remove();
+            }
+        }
+
+        System.out.println("\n" + countryList);
+
+//        countryList.forEach(c -> {
+//            if (c.getId() == id) {
+//                countryList.remove(c);
+//            }
+//            System.out.println(c);
+//        });
+
+        return ResponseEntity.noContent().build();
+    }
+
 
 }
